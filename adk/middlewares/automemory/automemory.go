@@ -150,7 +150,24 @@ type TopicSelectionConfig struct {
 	// MaxTotalBytes caps the total rendered topic memory reminder.
 	// Optional. Defaults to 16k.
 	MaxTotalBytes int
+
+	// OutputMode constrains the response format used for topic selection.
+	// Supported values: "json_schema", "json_object".
+	// When set, the fallback step uses only this response format (no further fallback).
+	// When empty (default), the middleware first tries a plain call (tools configured,
+	// no response_format), then falls back to json_schema and json_object in order.
+	OutputMode TopicSelectionOutputMode
 }
+
+// TopicSelectionOutputMode specifies the response format used for topic selection fallback.
+type TopicSelectionOutputMode string
+
+const (
+	// TopicSelectionOutputModeJSONSchema uses response_format=json_schema for structured output.
+	TopicSelectionOutputModeJSONSchema TopicSelectionOutputMode = "json_schema"
+	// TopicSelectionOutputModeJSONObject uses response_format=json_object for structured output.
+	TopicSelectionOutputModeJSONObject TopicSelectionOutputMode = "json_object"
+)
 
 type WriteMode string
 
@@ -621,14 +638,44 @@ func (m *middleware[M]) selectTopicCandidates(
 		return nil, err
 	}
 
-	toolInfo := topicSelectionToolInfo()
+	valid := make(map[string]struct{}, len(relToBundle))
+	for k := range relToBundle {
+		valid[k] = struct{}{}
+	}
+
+	mode := m.cfg.Read.TopicSelection.OutputMode
+	if mode != "" {
+		// Fixed mode: skip plain call, directly use the configured response_format.
+		return m.selectTopicWithResponseFormat(ctx, mode, userMsg, valid, topK)
+	}
+
+	// Step 1: plain call (tools configured, no forced choice, no response_format).
+	selected, plainErr := m.selectTopicPlain(ctx, userMsg, valid, topK)
+	if plainErr == nil {
+		return selected, nil
+	}
+
+	// Step 2: auto fallback with response_format — try json_schema, then json_object.
+	selected, err = m.selectTopicWithResponseFormat(ctx, TopicSelectionOutputModeJSONSchema, userMsg, valid, topK)
+	if err == nil {
+		return selected, nil
+	}
+	return m.selectTopicWithResponseFormat(ctx, TopicSelectionOutputModeJSONObject, userMsg, valid, topK)
+}
+
+// selectTopicPlain calls the model with tools configured but no forced choice and no response_format.
+func (m *middleware[M]) selectTopicPlain(
+	ctx context.Context,
+	userMsg string,
+	valid map[string]struct{},
+	topK int,
+) ([]string, error) {
 	respStream, err := m.topicSelectionModel.Stream(
 		ctx,
 		[]M{
-			makeSystemMsg[M](getTopicSelectionSystemPrompt()),
+			makeSystemMsg[M](getTopicSelectionSystemPrompt() + "\n\n" + getTopicSelectionJSONOutputHint()),
 			makeUserMsg[M](userMsg),
 		},
-		makeToolChoiceForced[M](toolInfo.Name),
 	)
 	if err != nil {
 		return nil, err
@@ -639,11 +686,69 @@ func (m *middleware[M]) selectTopicCandidates(
 		return nil, err
 	}
 
-	valid := make(map[string]struct{}, len(relToBundle))
-	for k := range relToBundle {
-		valid[k] = struct{}{}
+	return m.parseTopicSelectionResponse(resp, valid, topK)
+}
+
+// selectTopicWithResponseFormat calls the model with tools and the given response_format.
+func (m *middleware[M]) selectTopicWithResponseFormat(
+	ctx context.Context,
+	mode TopicSelectionOutputMode,
+	userMsg string,
+	valid map[string]struct{},
+	topK int,
+) ([]string, error) {
+	var rfOpt model.Option
+	switch mode {
+	case TopicSelectionOutputModeJSONSchema:
+		rfOpt = model.WithResponseFormat(&schema.ResponseFormat{
+			Type: schema.ResponseFormatTypeJSONSchema,
+			JSONSchema: &schema.ResponseFormatJSONSchema{
+				Name:   "topic_selection",
+				Schema: topicSelectionJSONSchema(),
+				Strict: true,
+			},
+		})
+	case TopicSelectionOutputModeJSONObject:
+		rfOpt = model.WithResponseFormat(&schema.ResponseFormat{
+			Type: schema.ResponseFormatTypeJSONObject,
+		})
+	default:
+		return nil, fmt.Errorf("unsupported topic selection output mode: %q", mode)
 	}
-	selected, err := parseTopicSelectionFromToolCall(resp, valid)
+
+	respStream, err := m.topicSelectionModel.Stream(
+		ctx,
+		[]M{
+			makeSystemMsg[M](getTopicSelectionSystemPrompt() + "\n\n" + getTopicSelectionJSONOutputHint()),
+			makeUserMsg[M](userMsg),
+		},
+		rfOpt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := concatMessageStream(respStream)
+	if err != nil {
+		return nil, err
+	}
+
+	return m.parseTopicSelectionResponse(resp, valid, topK)
+}
+
+// parseTopicSelectionResponse tries to extract selected memories from a model response,
+// checking tool_call first, then falling back to content JSON parsing.
+func (m *middleware[M]) parseTopicSelectionResponse(resp M, valid map[string]struct{}, topK int) ([]string, error) {
+	// Try tool call first.
+	if selected, err := parseTopicSelectionFromToolCall(resp, valid); err == nil {
+		if len(selected) > topK {
+			return selected[:topK], nil
+		}
+		return selected, nil
+	}
+
+	// Fall back to content JSON parsing.
+	selected, err := parseTopicSelectionFromContent[M](resp, valid)
 	if err != nil {
 		return nil, err
 	}
