@@ -1,28 +1,4 @@
-/*
- * Copyright (c) 2025 Harrison Chase
- * Copyright (c) 2025 CloudWeGo Authors
- * SPDX-License-Identifier: MIT
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package filesystem
-
-// This file contains prompt templates and tool descriptions adapted from the DeepAgents project.
-// Original source: https://github.com/langchain-ai/deepagents
-//
-// These prompts are used under the terms of the original project's open source license.
-// When using this code in your own open source project, ensure compliance with the original license requirements.
 
 const (
 	tooLargeToolMessage = `Tool result too large, the result of this tool call {tool_call_id} was saved in the filesystem at this path: {file_path}
@@ -89,7 +65,6 @@ Usage:
 - 如果你读取的文件存在但内容为空，你将收到系统提醒警告而不是文件内容
 - 在编辑文件之前，你应该始终确保已读取该文件`
 
-	// EnhancedReadFileDescSuffix is appended to ReadFileToolDesc when using MultiModalReadFileTool.
 	EnhancedReadFileDescSuffix = `
 - This tool supports reading image files (e.g., PNG, JPG, etc.). When reading an image file, the contents are presented visually, as the underlying model is a multimodal LLM.
 - This tool can read PDF files (.pdf). For large PDFs (more than 10 pages), you MUST provide the pages parameter to read specific page ranges (e.g., pages: "1-5"). Reading a large PDF without the pages parameter will fail. Maximum 20 pages per request.`

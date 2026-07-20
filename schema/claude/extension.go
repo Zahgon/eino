@@ -1,24 +1,4 @@
-/*
- * Copyright 2025 CloudWeGo Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package claude
-
-import (
-	"fmt"
-)
 
 type ResponseMetaExtension struct {
 	ID           string       `json:"id,omitempty"`
@@ -84,51 +64,12 @@ type CitationWebSearchResultLocation struct {
 	EncryptedIndex string `json:"encrypted_index,omitempty"`
 }
 
-// ConcatAssistantGenTextExtensions merges multiple AssistantGenTextExtension chunks into one.
 func ConcatAssistantGenTextExtensions(chunks []*AssistantGenTextExtension) (*AssistantGenTextExtension, error) {
-	if len(chunks) == 0 {
-		return nil, fmt.Errorf("no assistant generated text extension found")
-	}
-	if len(chunks) == 1 {
-		return chunks[0], nil
-	}
-
-	ret := &AssistantGenTextExtension{
-		Citations: make([]*TextCitation, 0, len(chunks)),
-	}
-
-	for _, ext := range chunks {
-		ret.Citations = append(ret.Citations, ext.Citations...)
-	}
-
-	return ret, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
-// ConcatResponseMetaExtensions merges multiple ResponseMetaExtension chunks into one.
 func ConcatResponseMetaExtensions(chunks []*ResponseMetaExtension) (*ResponseMetaExtension, error) {
-	if len(chunks) == 0 {
-		return nil, fmt.Errorf("no response meta extension found")
-	}
-	if len(chunks) == 1 {
-		return chunks[0], nil
-	}
-
-	ret := &ResponseMetaExtension{}
-
-	for _, ext := range chunks {
-		if ext.ID != "" {
-			ret.ID = ext.ID
-		}
-		if ext.StopReason != "" {
-			ret.StopReason = ext.StopReason
-		}
-		if ext.StopSequence != "" {
-			ret.StopSequence = ext.StopSequence
-		}
-		if ext.StopDetails != nil {
-			ret.StopDetails = ext.StopDetails
-		}
-	}
-
-	return ret, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }

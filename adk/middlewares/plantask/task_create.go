@@ -1,36 +1,16 @@
-/*
- * Copyright 2025 CloudWeGo Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package plantask
 
 import (
 	"context"
-	"fmt"
-	"path/filepath"
 	"sync"
 
-	"github.com/bytedance/sonic"
-
-	"github.com/cloudwego/eino/adk/internal"
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/schema"
 )
 
 func newTaskCreateTool(backend Backend, baseDir string, lock *sync.Mutex) *taskCreateTool {
-	return &taskCreateTool{Backend: backend, BaseDir: baseDir, lock: lock}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 type taskCreateTool struct {
@@ -47,136 +27,13 @@ type taskCreateArgs struct {
 }
 
 func (t *taskCreateTool) Info(ctx context.Context) (*schema.ToolInfo, error) {
-	desc := internal.SelectPrompt(internal.I18nPrompts{
-		English: taskCreateToolDesc,
-		Chinese: taskCreateToolDescChinese,
-	})
-
-	return &schema.ToolInfo{
-		Name: TaskCreateToolName,
-		Desc: desc,
-		ParamsOneOf: schema.NewParamsOneOfByParams(map[string]*schema.ParameterInfo{
-			"subject": {
-				Type:     schema.String,
-				Desc:     "A brief title for the task",
-				Required: true,
-			},
-			"description": {
-				Type:     schema.String,
-				Desc:     "A detailed description of what needs to be done",
-				Required: true,
-			},
-			"activeForm": {
-				Type:     schema.String,
-				Desc:     "Present continuous form shown in spinner when in_progress (e.g., \"Running tests\")",
-				Required: false,
-			},
-			"metadata": {
-				Type: schema.Object,
-				Desc: "Arbitrary metadata to attach to the task",
-				SubParams: map[string]*schema.ParameterInfo{
-					"propertyNames": {
-						Type: schema.String,
-					},
-				},
-				Required: false,
-			},
-		}),
-	}, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 func (t *taskCreateTool) InvokableRun(ctx context.Context, argumentsInJSON string, opts ...tool.Option) (string, error) {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
-	params := &taskCreateArgs{}
-	err := sonic.UnmarshalString(argumentsInJSON, params)
-	if err != nil {
-		return "", err
-	}
-
-	files, err := t.Backend.LsInfo(ctx, &LsInfoRequest{
-		Path: t.BaseDir,
-	})
-	if err != nil {
-		return "", fmt.Errorf("%s list files in %s failed, err: %w", TaskCreateToolName, t.BaseDir, err)
-	}
-
-	highwatermark := int64(0)
-	for _, file := range files {
-		fileName := filepath.Base(file.Path)
-		if fileName == highWatermarkFileName {
-			content, readErr := t.Backend.Read(ctx, &ReadRequest{
-				FilePath: file.Path,
-			})
-			if readErr != nil {
-				return "", fmt.Errorf("%s read highwatermark file %s failed, err: %w", TaskCreateToolName, file.Path, readErr)
-			}
-			if content.Content != "" {
-				var val int64
-				if _, scanErr := fmt.Sscanf(content.Content, "%d", &val); scanErr == nil {
-					highwatermark = val
-				}
-			}
-			break
-		}
-	}
-
-	taskID := highwatermark + 1
-	taskFileName := fmt.Sprintf("%d.json", taskID)
-
-	for _, file := range files {
-		fileName := filepath.Base(file.Path)
-		if fileName == taskFileName {
-			return "", fmt.Errorf("task #%d already exists", taskID)
-		}
-	}
-
-	newTask := &task{
-		ID:          fmt.Sprintf("%d", taskID),
-		Subject:     params.Subject,
-		Description: params.Description,
-		Status:      taskStatusPending,
-		Blocks:      []string{},
-		BlockedBy:   []string{},
-		ActiveForm:  params.ActiveForm,
-		Metadata:    params.Metadata,
-	}
-
-	taskData, err := sonic.MarshalString(newTask)
-	if err != nil {
-		return "", fmt.Errorf("%s marshal task #%d failed, err: %w", TaskCreateToolName, taskID, err)
-	}
-
-	//  Write highwatermark file first
-	highwatermarkPath := filepath.Join(t.BaseDir, highWatermarkFileName)
-	err = t.Backend.Write(ctx, &WriteRequest{
-		FilePath: highwatermarkPath,
-		Content:  fmt.Sprintf("%d", taskID),
-	})
-	if err != nil {
-		return "", fmt.Errorf("%s update highwatermark file %s failed, err: %w", TaskCreateToolName, highwatermarkPath, err)
-	}
-
-	taskFilePath := filepath.Join(t.BaseDir, taskFileName)
-	err = t.Backend.Write(ctx, &WriteRequest{
-		FilePath: taskFilePath,
-		Content:  taskData,
-	})
-	if err != nil {
-		return "", fmt.Errorf("%s create Task #%d failed, err: %w", TaskCreateToolName, taskID, err)
-	}
-
-	resp := &taskOut{
-		Result: fmt.Sprintf("Task #%d created successfully: %s", taskID, params.Subject),
-	}
-
-	jsonResp, err := sonic.MarshalString(resp)
-	if err != nil {
-		return "", fmt.Errorf("%s marshal taskOut failed, err: %w", TaskCreateToolName, err)
-	}
-
-	return jsonResp, nil
+	_ = "STUB: not implemented"
+	return "", nil
 }
 
 const TaskCreateToolName = "TaskCreate"

@@ -1,27 +1,4 @@
-/*
- * Copyright 2026 CloudWeGo Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-// Package reduction provides middlewares to trim context and clear tool results.
 package reduction
-
-import (
-	"fmt"
-
-	"github.com/cloudwego/eino/adk/internal"
-)
 
 const (
 	truncFmt = `<persisted-output>
@@ -69,50 +46,20 @@ const (
 	msgClearedFlag = "_reduction_mw_processed"
 )
 
-func getTruncFmt() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: truncFmt,
-		Chinese: truncFmtZh,
-	})
-}
+func getTruncFmt() string { _ = "STUB: not implemented"; return "" }
 
-func getStreamTruncFmt() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: streamTruncFmt,
-		Chinese: streamTruncFmtZh,
-	})
-}
+func getStreamTruncFmt() string { _ = "STUB: not implemented"; return "" }
 
 func formatStreamOffloadSavedNotify(filePath, readFileToolName string) string {
-	return fmt.Sprintf(internal.SelectPrompt(internal.I18nPrompts{
-		English: "Full output saved to: %s. Use %s to view.",
-		Chinese: "完整输出保存到: %s。使用 %s 进行查看。",
-	}), filePath, readFileToolName)
+	_ = "STUB: not implemented"
+	return ""
 }
 
-func formatStreamOffloadFailedNotify(err error) string {
-	if err == nil {
-		return ""
-	}
-	return fmt.Sprintf(internal.SelectPrompt(internal.I18nPrompts{
-		English: "Failed to save full output: %v.",
-		Chinese: "完整输出保存失败: %v。",
-	}), err)
-}
+func formatStreamOffloadFailedNotify(err error) string { _ = "STUB: not implemented"; return "" }
 
-func getClearWithOffloadingFmt() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: clearWithOffloadingFmt,
-		Chinese: clearWithOffloadingFmtZh,
-	})
-}
+func getClearWithOffloadingFmt() string { _ = "STUB: not implemented"; return "" }
 
-func getClearWithoutOffloadingFmt() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: clearWithoutOffloadingFmt,
-		Chinese: clearWithoutOffloadingFmtZh,
-	})
-}
+func getClearWithoutOffloadingFmt() string { _ = "STUB: not implemented"; return "" }
 
 type scene int
 

@@ -1,21 +1,3 @@
-/*
- * Copyright 2024 CloudWeGo Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-// Package router provides retrieval routing helpers that merge results
-// from multiple retrievers and apply ranking strategies.
 package router
 
 import (
@@ -23,10 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/cloudwego/eino/callbacks"
 	"github.com/cloudwego/eino/components/retriever"
-	"github.com/cloudwego/eino/compose"
-	"github.com/cloudwego/eino/flow/retriever/utils"
 	"github.com/cloudwego/eino/schema"
 )
 
@@ -64,51 +43,16 @@ var rrf = func(ctx context.Context, result map[string][]*schema.Document) ([]*sc
 	return docList, nil
 }
 
-// NewRetriever creates a router retriever.
-// router retriever is useful when you want to retrieve documents from multiple retrievers with different queries.
-// eg.
-//
-//	routerRetriever := router.NewRetriever(ctx, &router.Config{})
-//	docs, err := routerRetriever.Retrieve(ctx, "how to build agent with eino")
-//	if err != nil {
-//		...
-//	}
-//	println(docs)
 func NewRetriever(ctx context.Context, config *Config) (retriever.Retriever, error) {
-	if len(config.Retrievers) == 0 {
-		return nil, fmt.Errorf("retrievers is empty")
-	}
-
-	router := config.Router
-	if router == nil {
-		var retrieverSet []string
-		for k := range config.Retrievers {
-			retrieverSet = append(retrieverSet, k)
-		}
-		router = func(ctx context.Context, query string) ([]string, error) {
-			return retrieverSet, nil
-		}
-	}
-
-	fusion := config.FusionFunc
-	if fusion == nil {
-		fusion = rrf
-	}
-
-	return &routerRetriever{
-		retrievers: config.Retrievers,
-		router:     config.Router,
-		fusionFunc: fusion,
-	}, nil
+	_ = "STUB: not implemented"
+	return *new(retriever.Retriever), nil
 }
 
-// Config is the config for router retriever.
 type Config struct {
-	// Retrievers is the retrievers to be used.
 	Retrievers map[string]retriever.Retriever
-	// Router is the function to route the query to the retrievers.
+
 	Router func(ctx context.Context, query string) ([]string, error)
-	// FusionFunc is the function to fuse the documents from the retrievers.
+
 	FusionFunc func(ctx context.Context, result map[string][]*schema.Document) ([]*schema.Document, error)
 }
 
@@ -118,78 +62,19 @@ type routerRetriever struct {
 	fusionFunc func(ctx context.Context, result map[string][]*schema.Document) ([]*schema.Document, error)
 }
 
-// Retrieve retrieves documents from the router retriever.
 func (e *routerRetriever) Retrieve(ctx context.Context, query string, opts ...retriever.Option) ([]*schema.Document, error) {
-	routeCtx := ctxWithRouterRunInfo(ctx)
-	routeCtx = callbacks.OnStart(routeCtx, query)
-	retrieverNames, err := e.router(routeCtx, query)
-	if err != nil {
-		callbacks.OnError(routeCtx, err)
-		return nil, err
-	}
-	if len(retrieverNames) == 0 {
-		err = fmt.Errorf("no retriever has been selected")
-		callbacks.OnError(routeCtx, err)
-		return nil, err
-	}
-	callbacks.OnEnd(routeCtx, retrieverNames)
-
-	// retrieve
-	tasks := make([]*utils.RetrieveTask, len(retrieverNames))
-	for i := range retrieverNames {
-		r, ok := e.retrievers[retrieverNames[i]]
-		if !ok {
-			return nil, fmt.Errorf("router output[%s] has not registered", retrieverNames[i])
-		}
-		tasks[i] = &utils.RetrieveTask{
-			Name:            retrieverNames[i],
-			Retriever:       r,
-			Query:           query,
-			RetrieveOptions: opts,
-		}
-	}
-	utils.ConcurrentRetrieveWithCallback(ctx, tasks)
-	result := make(map[string][]*schema.Document)
-	for i := range tasks {
-		if tasks[i].Err != nil {
-			return nil, tasks[i].Err
-		}
-		result[tasks[i].Name] = tasks[i].Result
-	}
-
-	// fusion
-	fusionCtx := ctxWithFusionRunInfo(ctx)
-	fusionCtx = callbacks.OnStart(fusionCtx, result)
-	fusionDocs, err := e.fusionFunc(fusionCtx, result)
-	if err != nil {
-		callbacks.OnError(fusionCtx, err)
-		return nil, err
-	}
-	callbacks.OnEnd(fusionCtx, fusionDocs)
-	return fusionDocs, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
-// GetType returns the type of the retriever (Router).
-func (e *routerRetriever) GetType() string { return "Router" }
+func (e *routerRetriever) GetType() string { _ = "STUB: not implemented"; return "" }
 
 func ctxWithRouterRunInfo(ctx context.Context) context.Context {
-	runInfo := &callbacks.RunInfo{
-		Component: compose.ComponentOfLambda,
-		Type:      "Router",
-	}
-
-	runInfo.Name = runInfo.Type + string(runInfo.Component)
-
-	return callbacks.ReuseHandlers(ctx, runInfo)
+	_ = "STUB: not implemented"
+	return *new(context.Context)
 }
 
 func ctxWithFusionRunInfo(ctx context.Context) context.Context {
-	runInfo := &callbacks.RunInfo{
-		Component: compose.ComponentOfLambda,
-		Type:      "FusionFunc",
-	}
-
-	runInfo.Name = runInfo.Type + string(runInfo.Component)
-
-	return callbacks.ReuseHandlers(ctx, runInfo)
+	_ = "STUB: not implemented"
+	return *new(context.Context)
 }

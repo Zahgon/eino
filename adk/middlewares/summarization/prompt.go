@@ -1,77 +1,24 @@
-/*
- * Copyright 2026 CloudWeGo Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package summarization
 
 import (
 	"regexp"
-
-	"github.com/cloudwego/eino/adk/internal"
 )
 
 var allUserMessagesTagRegex = regexp.MustCompile(`(?s)<all_user_messages>.*</all_user_messages>`)
 
-func getSystemInstruction() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: systemInstruction,
-		Chinese: systemInstructionZh,
-	})
-}
+func getSystemInstruction() string { _ = "STUB: not implemented"; return "" }
 
-func getUserSummaryInstruction() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: userSummaryInstruction,
-		Chinese: userSummaryInstructionZh,
-	})
-}
+func getUserSummaryInstruction() string { _ = "STUB: not implemented"; return "" }
 
-func getSummaryPreamble() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: summaryPreamble,
-		Chinese: summaryPreambleZh,
-	})
-}
+func getSummaryPreamble() string { _ = "STUB: not implemented"; return "" }
 
-func getContinueInstruction() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: continueInstruction,
-		Chinese: continueInstructionZh,
-	})
-}
+func getContinueInstruction() string { _ = "STUB: not implemented"; return "" }
 
-func getTranscriptPathInstruction() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: transcriptPathInstruction,
-		Chinese: transcriptPathInstructionZh,
-	})
-}
+func getTranscriptPathInstruction() string { _ = "STUB: not implemented"; return "" }
 
-func getTruncatedMarkerFormat() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: truncatedMarkerFormat,
-		Chinese: truncatedMarkerFormatZh,
-	})
-}
+func getTruncatedMarkerFormat() string { _ = "STUB: not implemented"; return "" }
 
-func getUserMessagesReplacedNote() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: userMessagesReplacedNote,
-		Chinese: userMessagesReplacedNoteZh,
-	})
-}
+func getUserMessagesReplacedNote() string { _ = "STUB: not implemented"; return "" }
 
 const systemInstruction = `You are a helpful AI assistant tasked with summarizing conversations.`
 
@@ -321,20 +268,10 @@ const skillPreamble = "The following skills were invoked in this session. Contin
 
 const skillPreambleZh = "以下 Skill 已在本会话中被调用，请继续遵循这些指导原则：\n\n%s"
 
-func getSkillPreamble() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: skillPreamble,
-		Chinese: skillPreambleZh,
-	})
-}
+func getSkillPreamble() string { _ = "STUB: not implemented"; return "" }
 
 const skillTruncationMarker = "\n\n[... skill content truncated for compaction; use Read on the skill path if you need the full text]"
 
 const skillTruncationMarkerZh = "\n\n[... skill 内容已在压缩时截断，如需完整内容请通过 Read 读取 skill 对应的文件路径]"
 
-func getSkillTruncationMarker() string {
-	return internal.SelectPrompt(internal.I18nPrompts{
-		English: skillTruncationMarker,
-		Chinese: skillTruncationMarkerZh,
-	})
-}
+func getSkillTruncationMarker() string { _ = "STUB: not implemented"; return "" }
