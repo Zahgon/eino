@@ -1,27 +1,7 @@
-/*
- * Copyright 2025 CloudWeGo Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package adk
 
 import (
 	"context"
-	"fmt"
-	"strings"
-
-	"github.com/cloudwego/eino/adk/internal"
 )
 
 const (
@@ -46,19 +26,6 @@ When transferring: OUTPUT ONLY THE FUNCTION CALL`
 )
 
 func genTransferToAgentInstruction[M MessageType](ctx context.Context, agents []TypedAgent[M]) string {
-	tpl := internal.SelectPrompt(internal.I18nPrompts{
-		English: agentDescriptionTpl,
-		Chinese: agentDescriptionTplChinese,
-	})
-	instruction := internal.SelectPrompt(internal.I18nPrompts{
-		English: TransferToAgentInstruction,
-		Chinese: TransferToAgentInstructionChinese,
-	})
-
-	var sb strings.Builder
-	for _, agent := range agents {
-		sb.WriteString(fmt.Sprintf(tpl, agent.Name(ctx), agent.Description(ctx)))
-	}
-
-	return fmt.Sprintf(instruction, sb.String(), TransferToAgentToolName)
+	_ = "STUB: not implemented"
+	return ""
 }
